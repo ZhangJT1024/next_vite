@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(timeout 5)",
+      "Bash(findstr /S /I \".vue,.ts,.json\" .)",
+      "Bash(findstr /V \"node_modules\")",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":3001\")",
+      "Bash(taskkill *)",
+      "Bash(findstr \":300[0-9]\")",
+      "Bash(findstr \"LISTENING\")",
+      "Bash(tasklist)",
+      "Bash(findstr \"node\\\\|vite\")"
+    ]
+  }
+}
