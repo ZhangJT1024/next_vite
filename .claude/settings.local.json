@@ -13,7 +13,8 @@
       "Bash(findstr \"LISTENING\")",
       "Bash(tasklist)",
       "Bash(findstr \"node\\\\|vite\")",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }
