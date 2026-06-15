@@ -12,7 +12,8 @@
       "Bash(findstr \":300[0-9]\")",
       "Bash(findstr \"LISTENING\")",
       "Bash(tasklist)",
-      "Bash(findstr \"node\\\\|vite\")"
+      "Bash(findstr \"node\\\\|vite\")",
+      "Bash(git add *)"
     ]
   }
 }

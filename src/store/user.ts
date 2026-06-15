@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { UserInfo } from '@/types'
 import {Register} from "@/api"
-import { log } from 'console'
 export interface LoginPayload {
   username: string
   password: string
@@ -56,19 +55,16 @@ export const useUserStore = defineStore('user', {
     // 注册
     async register(payload: RegisterPayload) {
       try {
-        const response = await Register(payload)
-        console.log(response,'responseresponseresponse');
-        
-        if (response?.code === 200) {
+        const response: any = await Register(payload)
+        console.log(response,'注册')
+        if (response?.status === 200) {
+          this.token = response.token
           return { status: true }
         }
-
-
       } catch (error) {
         console.error('注册失败:', error)
 
-        
-      } 
+      }
     },
 
     // 获取用户信息
@@ -139,5 +135,10 @@ export const useUserStore = defineStore('user', {
       this.token = null
       this.roles = []
     }
+  },
+
+  persist: {
+    key: 'user-storage',
+    paths: ['token', 'userInfo', 'roles'],
   }
 })
