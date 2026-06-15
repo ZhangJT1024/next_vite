@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { UserInfo } from '@/types'
-import {Register} from "@/api"
+import {Register,Login} from "@/api"
 export interface LoginPayload {
   username: string
   password: string
@@ -28,13 +28,9 @@ export const useUserStore = defineStore('user', {
 
   actions: {
     // 登录
-    async login(payload: LoginPayload) {
+    async login(payload: RegisterPayload) {
       try {
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        })
+        const response = await Login(payload)
 
         const data = await response.json()
 

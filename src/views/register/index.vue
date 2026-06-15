@@ -99,7 +99,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { User, Lock, Message, UserFilled } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
 const router = useRouter()
-const userStore = useUserStore()
+const userStore:any = useUserStore()
 
 // 注册表单
 const registerForm = reactive({
@@ -144,14 +144,17 @@ const rules: FormRules = {
 // 注册
 const handleRegister = async () => {
   await registerFormRef.value?.validate()
-
   loading.value = true
-   userStore.register({
-      account: registerForm.username,
-      password: registerForm.password,
-      nickname: registerForm.nickname
+  const loginParams = {
+    account: registerForm.username,
+    password: registerForm.password,
+    nickname: registerForm.nickname
+  }
+   userStore.register(loginParams).then(()=>{
+      userStore.login(loginParams)
+    }).finally(()=>{
+      loading.value = false
     })
- loading.value = false
   
 }
 
