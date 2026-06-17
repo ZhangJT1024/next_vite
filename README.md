@@ -19,6 +19,7 @@
 - Pinia
 - TypeScript
 - Vue Router
+- **Axios** - 用于统一处理网络请求
 
 ## 🚀 快速开始
 
@@ -63,6 +64,8 @@ vite/
 ├── public/              # 静态资源
 ├── src/
 │   ├── api/            # API 接口
+│   │   ├── index.ts    # Axios 基础请求封装
+│   │   └── api-guide.md # API 调用规范文档
 │   ├── assets/         # 静态资源
 │   ├── components/     # 公共组件
 │   ├── layouts/        # 布局组件
@@ -141,6 +144,7 @@ git push origin feature/xxx
 - 使用 ESLint 进行代码检查
 - 遵循 Prettier 格式规范
 - 保持代码清晰可读
+- **API 请求遵循 `src/api/api-guide.md` 中的规范**
 
 ## 📝 License
 

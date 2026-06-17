@@ -76,14 +76,11 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
-
-  if (!userStore.isLoggedIn && to.name !== 'Login' && to.name !== 'Register') {
-    next({ name: 'Login', query: { redirect: to.fullPath } })
-  } else if (userStore.isLoggedIn && (to.name === 'Login' || to.name === 'Register')) {
-    next({ name: 'Dashboard/home' })
-  } else {
+ if (userStore.isLoggedIn || to.name === 'Login' || to.name === 'Register') {
     document.title = to.meta.title ? `${to.meta.title as string} - 后台管理系统` : '后台管理系统'
     next()
+  }else{
+    next({ name: 'Login', query: { redirect: to.fullPath } })
   }
 })
 

@@ -140,7 +140,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { UserFilled, Avatar, Tickets, Odometer } from '@element-plus/icons-vue'
 import type { UserInfo } from '@/types'
-
+import { useUserStore } from '@/store/user'
 const userStore = useUserStore()
 
 interface Stats {

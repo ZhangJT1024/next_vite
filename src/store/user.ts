@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { UserInfo } from '@/types'
 import {Register,Login} from "@/api"
+import tokenManager from '@/utils/token'
 export interface LoginPayload {
   username: string
   password: string
@@ -53,8 +54,9 @@ export const useUserStore = defineStore('user', {
       try {
         const response: any = await Register(payload)
         console.log(response,'注册')
-        if (response?.status === 200) {
-          this.token = response.token
+        if (response?.data?.status === 200) {
+          this.token = response.data.token
+          tokenManager.setToken(response.data.token)
           return { status: true }
         }
       } catch (error) {
