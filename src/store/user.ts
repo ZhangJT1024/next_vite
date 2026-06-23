@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { UserInfo } from '@/types'
 import {Register,Login,Logout} from "@/api"
-import tokenManager from '@/utils/token'
-import { debug } from 'console'
+import tokenManager from '@/utils/token' 
+import { log } from 'console'
 export interface LoginPayload {
   username: string
   password: string
@@ -33,14 +33,12 @@ export const useUserStore = defineStore('user', {
     async login(payload: RegisterPayload) {
       try {
         const response = await Login(payload)
-
-        const data = await response.json()
-
+        const data = response.data
         if (data.code === 200) {
-          this.userInfo = data.data.user
-          this.token = data.data.token
-          this.roles = data.data.roles || ['user']
-          return { success: true, userInfo: data.data.user }
+          this.userInfo = data.userInfo
+          this.token = data.token
+          this.roles = data.roles || ['user']
+          return { success: true, userInfo: data.userInfo }
         } else {
           throw new Error(data.message)
         }
@@ -91,15 +89,11 @@ export const useUserStore = defineStore('user', {
 
     // 登出
     async logout(payload:any) {
-      try {
-        console.log('正在登出用户:', payload,this.userInfo)
-        await Logout({ account: this.userInfo.account || ''  })
- 
-      } catch (error) {
+      return Logout({ account: this.userInfo?.account || ''  }).then(()=>{
+        this.$reset()
+      }).catch(()=>{
         console.error('登出失败:', error)
-      } finally {
-        this.reset()
-      }
+      })
     },
 
     // 更新用户信息
@@ -129,10 +123,12 @@ export const useUserStore = defineStore('user', {
     },
 
     // 重置状态
-    reset() {
+    reset() { 
+      console.log('开始情况');
+      
       this.userInfo = null
       this.token = null
-      this.roles = []
+      this.roles = [] 
     }
   },
 

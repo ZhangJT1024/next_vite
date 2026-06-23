@@ -65,6 +65,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { UserFilled, ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
 import { usePermissionStore } from '@/store/permission'
+import { log } from 'console'
 
 const route = useRoute()
 const router = useRouter()
@@ -97,8 +98,10 @@ const routes = [
 // 处理命令
 const handleCommand = (command: string) => {
   if (command === 'logout') {
-    userStore.logout()
+    userStore.logout().finally(()=>{
     router.push('/login')
+    })
+    console.log('进入此处了');
   } else if (command === 'profile') {
     router.push('/profile')
   } else if (command === 'settings') {

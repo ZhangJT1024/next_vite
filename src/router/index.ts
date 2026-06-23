@@ -76,6 +76,8 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
+  console.log(to,'路由收尾了',userStore.isLoggedIn, to.name );
+  
  if (userStore.isLoggedIn || to.name === 'Login' || to.name === 'Register') {
     document.title = to.meta.title ? `${to.meta.title as string} - 后台管理系统` : '后台管理系统'
     next()

@@ -89,12 +89,10 @@ let loginTimer: ReturnType<typeof setTimeout> | null = null
 // 表单验证规则
 const rules: FormRules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度在 3-20 个字符', trigger: 'blur' }
+    { required: true, message: '请输入用户名', trigger: 'blur' }, 
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能小于 6 位', trigger: 'blur' }
+    { required: true, message: '请输入密码', trigger: 'blur' }, 
   ]
 }
 
@@ -108,7 +106,7 @@ const handleLogin = async () => {
     loading.value = true
     try {
       const result = await userStore.login({
-        username: loginForm.username,
+        account: loginForm.username,
         password: loginForm.password
       })
 
