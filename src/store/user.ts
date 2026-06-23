@@ -93,7 +93,6 @@ export const useUserStore = defineStore('user', {
     async logout(payload:any) {
       try {
         console.log('正在登出用户:', payload,this.userInfo)
-        debugger
         await Logout({ account: this.userInfo.account || ''  })
  
       } catch (error) {
