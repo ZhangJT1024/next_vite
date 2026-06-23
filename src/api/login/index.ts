@@ -7,3 +7,7 @@ export function Register(data: { username: string; password: string; nickname: s
 export function Login(data: { username: string; password: string; nickname: string }) {
   return request('POST','/api/login',data)
 }
+// 登出账号
+export function Logout(data: { account: string}) {
+  return request('POST','/api/login/logoutAccounts',data)
+}

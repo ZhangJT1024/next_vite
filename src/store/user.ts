@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { UserInfo } from '@/types'
-import {Register,Login} from "@/api"
+import {Register,Login,Logout} from "@/api"
 import tokenManager from '@/utils/token'
+import { debug } from 'console'
 export interface LoginPayload {
   username: string
   password: string
@@ -56,6 +57,7 @@ export const useUserStore = defineStore('user', {
         console.log(response,'注册')
         if (response?.data?.status === 200) {
           this.token = response.data.token
+          this.userInfo = response.data.userInfo
           tokenManager.setToken(response.data.token)
           return { status: true }
         }
@@ -88,12 +90,12 @@ export const useUserStore = defineStore('user', {
     },
 
     // 登出
-    async logout() {
+    async logout(payload:any) {
       try {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${this.token}` }
-        })
+        console.log('正在登出用户:', payload,this.userInfo)
+        debugger
+        await Logout({ account: this.userInfo.account || ''  })
+ 
       } catch (error) {
         console.error('登出失败:', error)
       } finally {

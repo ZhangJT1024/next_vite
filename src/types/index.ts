@@ -1,6 +1,7 @@
 // 用户信息接口
 export interface UserInfo {
   id: number
+  accoount: string
   username: string
   nickname: string
   avatar?: string

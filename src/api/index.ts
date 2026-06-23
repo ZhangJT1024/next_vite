@@ -8,7 +8,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 const createRequestInstance = (baseURL: string = import.meta.env.VITE_API_BASE_URL || '/api', config:any = {}) => {
   const instance = axios.create({
     baseURL,
-    timeout: 10000,
+    timeout: 10000000,
     headers: {
       'Content-Type': 'application/json',
       ...config.headers,
