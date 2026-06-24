@@ -15,8 +15,10 @@
       >
         <template v-for="route in routes" :key="route.path">
           <el-menu-item :index="route.path">
-            <el-icon><component :is="route.meta?.icon || 'Menu'" /></el-icon>
-            <span>{{ route.meta?.title }}</span>
+            <template #default>
+              <el-icon><component :is="route.meta?.icon || 'Menu'" /></el-icon>
+              <span>{{ route.meta?.title }}</span>
+            </template>
           </el-menu-item>
         </template>
       </el-menu>
@@ -89,10 +91,11 @@ const currentUser = computed(() => {
 
 // 路由配置
 const routes = [
-  { path: '/dashboard', meta: { title: '仪表盘' } },
-  { path: '/users', meta: { title: '用户管理' } },
-  { path: '/roles', meta: { title: '角色管理' } },
-  { path: '/settings', meta: { title: '系统设置' } }
+  { path: '/dashboard/home', meta: { title: '仪表盘' } },
+  { path: '/dashboard/users', meta: { title: '用户管理' } },
+  { path: '/dashboard/roles', meta: { title: '角色管理' } },
+  { path: '/dashboard/settings', meta: { title: '系统设置' } },
+  { path: '/dashboard/ai', meta: { title: 'AI 对话' } }
 ]
 
 // 处理命令
@@ -113,7 +116,7 @@ const handleCommand = (command: string) => {
 onMounted(() => {
   // TODO: 实际项目中需要调用 API 获取用户信息和权限
   if (userStore.isLoggedIn) {
-    permissionStore.addRoutes([])
+    permissionStore.addRoutes(routes)
   }
 })
 </script>

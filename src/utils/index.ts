@@ -9,11 +9,11 @@ export function formatTime(date: Date | string, pattern?: string): string {
   const seconds = String(d.getSeconds()).padStart(2, '0')
 
   const patterns = {
-    yyyyMMddHHmmss: `${year}${month}${day}${hours}${minutes}${seconds}`,
-    yyyy-MM-dd: `${year}-${month}-${day}`,
-    yyyy/MM/dd: `${year}/${month}/${day}`,
-    HH:mm:ss: `${hours}:${minutes}:${seconds}`,
-    HH:mm: `${hours}:${minutes}`
+    'yyyyMMddHHmmss': `${year}${month}${day}${hours}${minutes}${seconds}`,
+    'yyyy-MM-dd': `${year}-${month}-${day}`,
+    'yyyy/MM/dd': `${year}/${month}/${day}`,
+    'HH:mm:ss': `${hours}:${minutes}:${seconds}`,
+    'HH:mm': `${hours}:${minutes}`
   }
 
   return patterns[pattern as keyof typeof patterns] || `${year}-${month}-${day} ${hours}:${minutes}`

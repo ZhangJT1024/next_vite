@@ -40,6 +40,12 @@ const routes: RouteRecordRaw[] = [
         name: 'Settings',
         component: () => import('@/views/settings/index.vue'),
         meta: { title: '系统设置', icon: 'Setting' }
+      },
+      {
+        path: 'ai',
+        name: 'Ai',
+        component: () => import('@/views/ai/index.vue'),
+        meta: { title: 'AI 对话', icon: 'ChatDotRound' }
       }
     ]
   },
@@ -76,7 +82,7 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
-  console.log(to,'路由收尾了',userStore.isLoggedIn, to.name );
+  console.log(to,'路由守卫',userStore.isLoggedIn, to.name );
   
  if (userStore.isLoggedIn || to.name === 'Login' || to.name === 'Register') {
     document.title = to.meta.title ? `${to.meta.title as string} - 后台管理系统` : '后台管理系统'

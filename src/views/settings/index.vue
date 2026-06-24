@@ -1,6 +1,6 @@
 <template>
   <div class="settings-container">
-    <el-tabs v-model:active-name="activeTab" type="card">
+    <el-tabs v-model="activeTab" type="card">
       <!-- 基本信息 -->
       <el-tab-pane label="基本信息" name="basic">
         <el-card shadow="hover">

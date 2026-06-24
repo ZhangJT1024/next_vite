@@ -99,6 +99,7 @@ const rules: FormRules = {
 // 登录
 const handleLogin = async () => {
   // 防抖处理
+  
   if (loginTimer) clearTimeout(loginTimer)
   loginTimer = setTimeout(async () => {
     await loginFormRef.value?.validate()
@@ -109,7 +110,9 @@ const handleLogin = async () => {
         account: loginForm.username,
         password: loginForm.password
       })
-
+      console.log(result,'登录的时候');
+      
+      
       if (result.success) {
         ElMessage.success('登录成功')
         // 延迟跳转，等待 store 更新
@@ -118,7 +121,9 @@ const handleLogin = async () => {
         }, 500)
       }
     } catch (error: any) {
-      ElMessage.error(error.message || '登录失败')
+      console.log(error,'返回的error');
+      
+      ElMessage.error(error?.message || '登录失败')
       loading.value = false
     } finally {
       loading.value = false

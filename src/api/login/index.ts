@@ -5,6 +5,7 @@ export function Register(data: { username: string; password: string; nickname: s
 }
 // 登录账号
 export function Login(data: { username: string; password: string; nickname: string }) {
+  
   return request('POST','/api/login',data)
 }
 // 登出账号
