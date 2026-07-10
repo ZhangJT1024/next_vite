@@ -19,6 +19,24 @@ export type {
   PaginateParams,
 } from './types';
 
+// ==================== 常量配置 ====================
+
+/**
+ * HTTP 错误码映射表
+ */
+const HTTP_ERROR_MAP: Record<number, string> = {
+  400: '请求参数错误',
+  401: '未授权，请重新登录',
+  403: '无权限访问',
+  404: '请求的资源不存在',
+  405: '请求方法不允许',
+  408: '请求超时',
+  500: '服务器内部错误',
+  502: '网关错误',
+  503: '服务不可用',
+  504: '网关超时',
+};
+
 // ==================== 创建 Axios 实例 ====================
 
 function createRequestInstance(
@@ -92,24 +110,14 @@ function createRequestInstance(
         const { status, data } = error.response;
         const res = data as ApiResponse;
 
-        switch (status) {
-          case 401:
-            console.error('[Auth Error]', '未授权，请重新登录');
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-            break;
-          case 403:
-            console.error('[Permission Error]', res?.msg || '无权限访问');
-            break;
-          case 404:
-            console.error('[Not Found]', '请求的资源不存在');
-            break;
-          case 500:
-            console.error('[Server Error]', res?.msg || '服务器内部错误');
-            break;
-          default:
-            console.error('[HTTP Error]', `状态码: ${status}`);
+        // 401 特殊处理：清除 token 并跳转登录页
+        if (status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
         }
+
+        const errorMsg = res?.msg || HTTP_ERROR_MAP[status] || `请求失败 (${status})`;
+        console.error(`[HTTP Error ${status}]`, errorMsg);
       } else if (error.code === 'ERR_NETWORK') {
         console.error('[Network Error]', '网络连接失败，请检查网络');
       } else if (error.code === 'ECONNABORTED') {
