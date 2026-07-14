@@ -4,24 +4,21 @@
     <div class="chat-header">
       <h2>AI 助手</h2>
       <div class="model-selector">
-        <el-select v-model="store.model" @change="onModelChange" size="small" placeholder="选择模型">
+        <el-select
+          v-model="store.model"
+          size="small"
+          placeholder="选择模型"
+          @change="onModelChange"
+        >
           <el-option label="默认模型 (Mock)" :value="'default'" />
-          <el-option
-            v-if="useClaude && hasToken"
-            label="Claude 3.5 Sonnet"
-            :value="'claude'"
-          />
-          <el-option
-            v-if="useGPT && hasToken"
-            label="GPT-4o"
-            :value="'gpt'"
-          />
+          <el-option v-if="useClaude && hasToken" label="Claude 3.5 Sonnet" :value="'claude'" />
+          <el-option v-if="useGPT && hasToken" label="GPT-4o" :value="'gpt'" />
         </el-select>
       </div>
     </div>
 
     <!-- 对话区域 -->
-    <div class="chat-messages" ref="messagesContainerRef">
+    <div ref="messagesContainerRef" class="chat-messages">
       <transition-group name="fade-expand" tag="div">
         <div
           v-for="(msg, index) in store.history"
@@ -33,7 +30,7 @@
             <el-icon v-else-if="msg.role === 'user'"><UserFilled /></el-icon>
           </div>
 
-          <div class="message-content" :class="{ 'is-thinking': store.isThinking }">
+          <div class="message-content">
             <span
               v-if="msg.role !== 'system' && msg.content"
               :class="{ 'markdown-body': isMarkdownModel }"
@@ -41,7 +38,10 @@
             ></span>
 
             <!-- 加载中 -->
-            <div v-if="store.isThinking" class="streaming-indicator">
+            <div
+              v-if="store.isThinking && msg.role === 'assistant' && !msg.content"
+              class="streaming-indicator"
+            >
               <el-icon><Loading /></el-icon>
               <span>正在思考...</span>
             </div>
@@ -66,8 +66,8 @@
     <!-- 输入区域 -->
     <div class="chat-input-wrapper">
       <el-input
-      type="textarea"
         v-model="store.input"
+        type="textarea"
         :autosize="{ minRows: 2 }"
         placeholder="请输入您的问题..."
         resize="none"
@@ -95,15 +95,13 @@
       <span v-if="store.sessions.length > 0" class="session-count">
         当前会话：{{ store.sessions.length }}
       </span>
-      <el-button link type="primary" size="small" @click="clearHistory">
-        清空历史
-      </el-button>
+      <el-button link type="primary" size="small" @click="clearHistory">清空历史</el-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
 import { useChatStore } from '@/store/business/chat'
 import type { ModelProvider } from '@/store/business/chat'
 import { ChatDotRound, UserFilled, CopyDocument, Loading, Upload } from '@element-plus/icons-vue'
@@ -122,7 +120,7 @@ const hasToken = !!tokenStr
 
 // 判断是否为 Markdown 模型
 const isMarkdownModel = computed<boolean>(() => {
-  const currentModel = store.model.value // 'default' | 'claude' | 'gpt'
+  const currentModel = store.model // 'default' | 'claude' | 'gpt'
   return currentModel === 'claude' || currentModel === 'gpt'
 })
 
@@ -133,25 +131,74 @@ const isMarkdownModel = computed<boolean>(() => {
 function formatMessage(text: string): string {
   if (!text) return ''
 
-  let formatted = text
-    // 代码块
-    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="code-block"><code>$2</code></pre>')
+  // 先处理代码块（避免内部被其他规则影响）
+  let formatted = text.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+    const escapedCode = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return `<pre class="code-block"><code class="language-${lang || 'plaintext'}">${escapedCode}</code></pre>`
+  })
+
+  formatted = formatted
     // inline 代码
-    .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
-    // 换行
+    .replace(/`([^`]+)`/g, (_, code) => {
+      return `<code class="inline-code">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code>`
+    })
+    // 换行（先处理）
     .replace(/\n/g, '<br>')
-    // 列表（有序）
-    .replace(/^(\d+)\.\s+(.*$)/gm, '<ol><li>$2</li></ol>')
-    // 列表（无序）
-    .replace(/^\- (.*)$/gm, '<ul><li>$1</li></ul>')
-    // 引用
-    .replace(/^>\s*(.*)$/gm, '<blockquote>$1</blockquote>')
     // 粗体
-    .replace(/\*\*(.*)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     // 斜体
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')
     // 链接
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="markdown-link">$1</a>')
+    .replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" class="markdown-link">$1</a>',
+    )
+
+  // 处理列表（需要按行处理，避免嵌套错误）
+  const lines = formatted.split('<br>')
+  let inOrderedList = false
+  let inUnorderedList = false
+  const processedLines: string[] = []
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    const orderedMatch = line.match(/^(\d+)\.\s+(.*)$/)
+    const unorderedMatch = line.match(/^-\s+(.*)$/)
+
+    if (orderedMatch) {
+      if (!inOrderedList) {
+        processedLines.push('<ol>')
+        inOrderedList = true
+      }
+      processedLines.push(`<li>${orderedMatch[2]}</li>`)
+    } else if (unorderedMatch) {
+      if (!inUnorderedList) {
+        processedLines.push('<ul>')
+        inUnorderedList = true
+      }
+      processedLines.push(`<li>${unorderedMatch[1]}</li>`)
+    } else {
+      // 结束列表
+      if (inOrderedList) {
+        processedLines.push('</ol>')
+        inOrderedList = false
+      }
+      if (inUnorderedList) {
+        processedLines.push('</ul>')
+        inUnorderedList = false
+      }
+      processedLines.push(line)
+    }
+  }
+
+  // 确保列表闭合
+  if (inOrderedList) processedLines.push('</ol>')
+  if (inUnorderedList) processedLines.push('</ul>')
+
+  formatted = processedLines.join('<br>')
+
+  // 处理引用
+  formatted = formatted.replace(/<br>>\s*(.*?)$/gm, '<blockquote>$1</blockquote>')
 
   return formatted
 }
@@ -166,63 +213,74 @@ const onModelChange = (model: ModelProvider) => {
 
 /** 发送消息 */
 const handleSend = async () => {
-  const content = store.input.value.trim()
+  const content = store.input.trim()
   if (!content) return
 
-  // 添加到历史（用户消息）
-  store.history.value.push({ role: 'user', content })
-
-  // 初始化会话（如果有）
+  // 初始化会话（如果还没有）
   if (store.sessions.length === 0) {
     store.initSession()
   }
 
+  // 添加到历史（用户消息）
+  store.history.push({ role: 'user', content })
+
   // 创建 assistant 消息占位符
-  const assistantIndex = store.history.length
-  store.history.splice(assistantIndex, 0, {
+  store.history.push({
     role: 'assistant',
-    content: ''
+    content: '',
   })
+  const assistantIndex = store.history.length - 1
+
+  // 清空输入框
+  store.input = ''
 
   // 滚动到底部
   scrollToBottom()
 
   // 开始流式生成
   try {
-    const type = getModelType(store.model.value)
+    const type = getModelType(store.model)
     const stream = await store.createStream(type)
 
     // 读取流式响应
     for await (const chunk of stream) {
-      if (!chunk.data) continue
-      const index = assistantIndex
-      if (index < store.history.length) {
-        const prevContent = store.history[index].content || ''
-        const newContent = prevContent + chunk.content
-        store.history[index] = { ...store.history[index], content: newContent }
+      if (chunk.done) break
+      if (!chunk.content) continue
 
-        // 更新当前会话的最后一条回答
-        const currentSession = store.currentSession.value
-        if (currentSession) {
-          currentSession.answers.push({ timestamp: Date.now(), content: newContent })
-        }
+      if (assistantIndex < store.history.length) {
+        const prevContent = store.history[assistantIndex].content || ''
+        const newContent = prevContent + chunk.content
+        store.history[assistantIndex] = { ...store.history[assistantIndex], content: newContent }
       }
 
       scrollToBottom()
     }
 
+    // 更新会话记录
+    const currentSession = store.currentSession
+    if (currentSession && assistantIndex < store.history.length) {
+      currentSession.answers.push({
+        timestamp: Date.now(),
+        content: store.history[assistantIndex].content,
+      })
+    }
+
     // 生成完成
     ElMessage.success('回复完成')
-
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : '生成失败，请重试'
     console.error('流式响应错误:', error)
-    ElMessage.error(error?.message || '生成失败，请重试')
+    ElMessage.error(errMsg)
+    // 移除失败的 assistant 消息
+    if (assistantIndex < store.history.length) {
+      store.history.splice(assistantIndex, 1)
+    }
   }
 }
 
 /** 根据模型类型返回 content type */
-function getModelType(model: ModelProvider): 'default' | 'markdown' {
-  // model.value: 'default' | 'claude' | 'gpt' | 'ollama'
+function getModelType(model: ModelProvider): 'default' | 'code' | 'markdown' {
+  // model: 'default' | 'claude' | 'gpt' | 'ollama'
   return model === 'claude' || model === 'gpt' ? 'markdown' : 'default'
 }
 
@@ -231,7 +289,7 @@ const scrollToBottom = () => {
   nextTick(() => {
     messagesContainerRef.value?.scrollTo({
       top: messagesContainerRef.value.scrollHeight,
-      behavior: 'smooth'
+      behavior: 'smooth',
     })
   })
 }
@@ -248,13 +306,17 @@ const copyMessage = async (content: string) => {
 
 /** 清空历史 */
 const clearHistory = () => {
-  store.clearHistory()
-  store.input.value = ''
   ElMessageBox.confirm('确定要清空所有历史记录吗？', '提示', {
-    type: 'warning'
-  }).then(() => {
-    // 确认清空
+    type: 'warning',
   })
+    .then(() => {
+      store.clearHistory()
+      store.input = ''
+      ElMessage.success('历史记录已清空')
+    })
+    .catch(() => {
+      // 用户取消
+    })
 }
 
 // ==================== 生命周期 ====================
@@ -264,9 +326,7 @@ onMounted(() => {
 })
 </script>
 
-<style lang="scss">
-@import 'element-plus/dist/index.css';
-
+<style lang="scss" scoped>
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -317,9 +377,17 @@ onMounted(() => {
         align-self: flex-end;
         flex-direction: row-reverse;
 
-        .message-avatar,
-        .message-content .markdown-body {
+        .message-avatar {
           display: none;
+        }
+
+        .message-content {
+          background-color: #409eff;
+          color: #fff;
+
+          span {
+            color: #fff !important;
+          }
         }
       }
 
@@ -346,24 +414,8 @@ onMounted(() => {
         padding: 12px 16px;
         border-radius: 12px;
         position: relative;
-
-        &.role-assistant {
-          background-color: #fff;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        &.role-user {
-          background-color: #409eff;
-          color: #fff;
-
-          span {
-            color: #fff !important;
-          }
-        }
-
-        &.is-thinking {
-          min-height: 24px;
-        }
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
         .markdown-body {
           word-break: break-word;
@@ -377,18 +429,18 @@ onMounted(() => {
             border-radius: 4px;
             font-family: 'Consolas', 'Monaco', monospace;
             font-size: 13px;
+          }
 
-            pre.code-block {
-              display: block;
-              margin: 10px 0;
-              padding: 12px;
-              border-radius: 8px;
-              overflow-x: auto;
+          pre.code-block {
+            display: block;
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
 
-              code {
-                background: none;
-                padding: 0;
-              }
+            code {
+              background: none;
+              padding: 0;
             }
           }
 
@@ -453,10 +505,12 @@ onMounted(() => {
     background-color: #fff;
     border-top: 1px solid #e4e7ed;
     padding: 16px 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
 
     .el-textarea {
-      width: calc(100% - 180px);
-      margin-right: 12px;
+      flex: 1;
 
       &::placeholder {
         color: #a0aec0;
@@ -465,7 +519,6 @@ onMounted(() => {
 
     .input-actions {
       display: flex;
-      gap: 12px;
     }
   }
 

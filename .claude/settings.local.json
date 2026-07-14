@@ -22,7 +22,9 @@
       "Bash(npx husky *)",
       "Bash(npx eslint *)",
       "Bash(npx prettier *)",
-      "Bash(mkdir -p \"g:\\\\code\\\\vite\\\\.vscode\")"
+      "Bash(mkdir -p \"g:\\\\code\\\\vite\\\\.vscode\")",
+      "Bash(git restore *)",
+      "Bash(git commit -m 'fix\\(markdown-preview\\): 修复 Markdown 预览组件的显示问题 *)"
     ],
     "additionalDirectories": ["G:\\code\\vite\\src\\layouts", "g:\\code\\vite"]
   }
