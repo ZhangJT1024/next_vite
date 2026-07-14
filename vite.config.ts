@@ -9,34 +9,34 @@ export default defineConfig({
     vue(),
     AutoImport({
       imports: ['vue', 'vue-router'],
-      dts: 'src/types/auto-imports.d.ts'
+      dts: 'src/types/auto-imports.d.ts',
     }),
     Components({
       resolvers: [ElementPlusResolver()],
-      dts: 'src/types/components.d.ts'
-    })
+      dts: 'src/types/components.d.ts',
+    }),
   ],
   resolve: {
     alias: {
       '@': '/src',
-      '#': '/'
-    }
+      '#': '/',
+    },
   },
   server: {
     port: 3001,
     open: true,
     host: 'localhost',
     proxy: {
-         '/api': {
+      '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
-    }
+    },
   },
   build: {
     outDir: 'dist',
     sourcemap: false,
-    chunkSizeWarningLimit: 1000
-  }
+    chunkSizeWarningLimit: 1000,
+  },
 })

@@ -5,7 +5,12 @@
         <el-input v-model="form.oldPassword" type="password" show-password />
       </el-form-item>
       <el-form-item label="新密码" prop="newPassword">
-        <el-input v-model="form.newPassword" type="password" show-password :placeholder="'长度至少 6 位，包含数字和字母'" />
+        <el-input
+          v-model="form.newPassword"
+          type="password"
+          show-password
+          :placeholder="'长度至少 6 位，包含数字和字母'"
+        />
       </el-form-item>
       <el-form-item label="确认密码" prop="confirmPassword">
         <el-input v-model="form.confirmPassword" type="password" show-password />
@@ -35,24 +40,29 @@ const formRef = ref<FormInstance>()
 const form = reactive({
   oldPassword: '',
   newPassword: '',
-  confirmPassword: ''
+  confirmPassword: '',
 })
 
 const rules: FormRules = {
   oldPassword: [{ required: true, message: '请输入原密码', trigger: 'blur' }],
   newPassword: [
     { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, message: '密码长度至少 6 位', trigger: 'blur' }
+    { min: 6, message: '密码长度至少 6 位', trigger: 'blur' },
   ],
   confirmPassword: [
     { required: true, message: '请确认密码', trigger: 'blur' },
-    { validator: (_, value) => value && value === form.newPassword ? Promise.resolve() : Promise.reject(new Error('两次输入的密码不一致')) }
-  ]
+    {
+      validator: (_, value) =>
+        value && value === form.newPassword
+          ? Promise.resolve()
+          : Promise.reject(new Error('两次输入的密码不一致')),
+    },
+  ],
 }
 
 const handleSubmit = async () => {
   await formRef.value?.validate()
-  const token = localStorage.getItem('token')
+  // const token = localStorage.getItem('token')
   // TODO: 调用后端 API 修改密码
   try {
     ElMessage.success('密码修改成功')

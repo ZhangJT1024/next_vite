@@ -1,0 +1,7 @@
+dist
+node_modules
+public
+coverage
+*.d.ts
+src/types/auto-imports.d.ts
+src/types/components.d.ts

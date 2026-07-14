@@ -6,20 +6,11 @@
         <p>创建新账号</p>
       </div>
 
-      <el-form
-        ref="registerFormRef"
-        :model="registerForm"
-        :rules="rules"
-        size="large"
-      >
+      <el-form ref="registerFormRef" :model="registerForm" :rules="rules" size="large">
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item prop="username">
-              <el-input
-                v-model="registerForm.username"
-                placeholder="用户名"
-                :prefix-icon="User"
-              />
+              <el-input v-model="registerForm.username" placeholder="用户名" :prefix-icon="User" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -69,37 +60,33 @@
         <el-form-item prop="agreeTerms">
           <el-checkbox v-model="registerForm.agreeTerms">
             我已阅读并同意
-            <el-link type="primary" underline>用户协议</el-link> 和
+            <el-link type="primary" underline>用户协议</el-link>
+            和
             <el-link type="primary" underline>隐私政策</el-link>
           </el-checkbox>
         </el-form-item>
 
-        <el-button
-          type="primary"
-          :loading="loading"
-          size="large"
-          @click="handleRegister"
-        >
+        <el-button type="primary" :loading="loading" size="large" @click="handleRegister">
           注册
         </el-button>
       </el-form>
 
       <div class="register-footer">
-        已有账号？<router-link to="/login">立即登录</router-link>
+        已有账号？
+        <router-link to="/login">立即登录</router-link>
       </div>
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { User, Lock, Message, UserFilled } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
 const router = useRouter()
-const userStore:any = useUserStore()
+const userStore: any = useUserStore()
 
 // 注册表单
 const registerForm = reactive({
@@ -108,7 +95,7 @@ const registerForm = reactive({
   password: '',
   confirmPassword: '',
   email: '',
-  agreeTerms: false
+  agreeTerms: false,
 })
 
 // loading
@@ -118,13 +105,13 @@ const loading = ref(false)
 const rules: FormRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度在 3-20 个字符', trigger: 'blur' }
+    { min: 3, max: 20, message: '用户名长度在 3-20 个字符', trigger: 'blur' },
   ],
   nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 5, message: '密码长度不能小于 5 位', trigger: 'blur' },
-    { pattern: /^\S*$/, message: '密码不能包含特殊字符', trigger: 'blur' }
+    { pattern: /^\S*$/, message: '密码不能包含特殊字符', trigger: 'blur' },
   ],
   confirmPassword: [
     { required: true, message: '请确认密码', trigger: 'blur' },
@@ -135,10 +122,10 @@ const rules: FormRules = {
         }
         return Promise.resolve()
       },
-      trigger: 'blur'
-    }
+      trigger: 'blur',
+    },
   ],
-  agreeTerms: [{ type: 'boolean', message: '请同意用户协议和隐私政策', trigger: 'change' }]
+  agreeTerms: [{ type: 'boolean', message: '请同意用户协议和隐私政策', trigger: 'change' }],
 }
 
 // 注册
@@ -146,16 +133,18 @@ const handleRegister = async () => {
   await registerFormRef.value?.validate()
   loading.value = true
   const loginParams = {
-    account: registerForm.username,
+    username: registerForm.username,
     password: registerForm.password,
-    nickname: registerForm.nickname
+    nickname: registerForm.nickname,
   }
-   userStore.register(loginParams).then(()=>{
+  userStore
+    .register(loginParams)
+    .then(() => {
       userStore.login(loginParams)
-    }).finally(()=>{
+    })
+    .finally(() => {
       loading.value = false
     })
-  
 }
 
 // 表单实例

@@ -1,13 +1,15 @@
 // 用户信息接口
 export interface UserInfo {
   id: number
-  accoount: string
+  account: string
   username: string
   nickname: string
   avatar?: string
   role: 'admin' | 'user' | 'editor'
   email?: string
   phone?: string
+  lastLoginTime?: string
+  status?: 'success' | 'warning' | 'info' | 'danger'
 }
 
 // 权限信息接口
@@ -20,7 +22,7 @@ export interface PermissionInfo {
 }
 
 // API 响应基础结构
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   code: number
   message: string
   data: T
@@ -35,7 +37,7 @@ export interface PaginationParams {
 }
 
 // 分页响应
-export interface PaginationResponse<T = any> {
+export interface PaginationResponse<T = unknown> {
   list: T[]
   total: number
   page: number
@@ -44,6 +46,6 @@ export interface PaginationResponse<T = any> {
 
 // 通用请求参数
 export interface RequestParams {
-  params?: Record<string, any>
-  query?: Record<string, any>
+  params?: Record<string, unknown>
+  query?: Record<string, unknown>
 }

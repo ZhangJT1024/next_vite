@@ -14,7 +14,7 @@ export const DEFAULT_CHUNKS = [
   '术角度看',
   '度，这个功能可以实',
   '现。建议你先明确具体需求，',
-  '然后我们可以一步步实现。'
+  '然后我们可以一步步实现。',
 ]
 
 // ==================== Code 代码块回复 ====================
@@ -22,7 +22,7 @@ export const DEFAULT_CHUNKS = [
 export const CODE_CHUNKS = [
   '这里有一段示例代码：',
   '',
-  '\``,\`',
+  '```',
   '// Vue + TypeScript 组件示例',
   'interface User {',
   '  id: number,',
@@ -32,8 +32,8 @@ export const CODE_CHUNKS = [
   '',
   'const user = {',
   '  id: 1,',
-  '  name: \'张三\',',
-  '  email: \'zhangsan@example.com\''
+  "  name: '张三',",
+  "  email: 'zhangsan@example.com'",
 ]
 
 // ==================== Markdown 富文本回复 ====================
@@ -54,7 +54,7 @@ export const MARKDOWN_CHUNKS = [
   '',
   '### 引用',
   '> 这是一段引用文字',
-  '> 可以表达重要信息'
+  '> 可以表达重要信息',
 ]
 
 // ==================== Mermaid 图表演示 ====================

@@ -29,7 +29,7 @@ interface OpenAIStreamResponse {
     delta: { role?: string; content?: string }
     finish_reason?: string
   }>
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /** Ollama API 响应格式 */
@@ -78,12 +78,13 @@ export class ModelAdapterFactory {
 // ==================== 适配器基类 ====================
 
 /** 模型响应适配器接口 */
-export interface Adapter<TResponse> {
+export interface Adapter<_TResponse = unknown> {
   /**
    * 将原始响应转换为统一的流式增量格式
    * @param response - 原始响应 Stream / ReadableStream
    * @returns 归一化的流式生成器
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   process(response: any): AsyncGenerator<ChatStreamChunk, void, unknown>
 
   /** 获取适配器类型标识 */
@@ -93,8 +94,11 @@ export interface Adapter<TResponse> {
 // ==================== Claude 适配器 ====================
 
 class ClaudeAdapter implements Adapter<ClaudeStreamResponse> {
-  getType(): string { return 'claude' }
+  getType(): string {
+    return 'claude'
+  }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async *process(response: any): AsyncGenerator<ChatStreamChunk, void, unknown> {
     const reader = response.getReader()
 
@@ -119,7 +123,7 @@ class ClaudeAdapter implements Adapter<ClaudeStreamResponse> {
               content: accumulatedText,
               role: data.delta.role || 'assistant',
               done: false,
-              data: accumulatedText
+              data: accumulatedText,
             }
           }
         }
@@ -129,7 +133,7 @@ class ClaudeAdapter implements Adapter<ClaudeStreamResponse> {
         content: '',
         role: 'assistant',
         done: true,
-        data: null
+        data: null,
       }
     } catch (error) {
       console.error('Claude 解析错误:', error)
@@ -143,8 +147,11 @@ class ClaudeAdapter implements Adapter<ClaudeStreamResponse> {
 // ==================== OpenAI 适配器 ====================
 
 class OpenAIAdapter implements Adapter<OpenAIStreamResponse> {
-  getType(): string { return 'openai' }
+  getType(): string {
+    return 'openai'
+  }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async *process(response: any): AsyncGenerator<ChatStreamChunk, void, unknown> {
     const reader = response.getReader()
 
@@ -163,7 +170,7 @@ class OpenAIAdapter implements Adapter<OpenAIStreamResponse> {
             content,
             role: data.choices[0].delta.role || 'assistant',
             done: !!data.choices[0].finish_reason,
-            data: content
+            data: content,
           }
         }
       }
@@ -172,7 +179,7 @@ class OpenAIAdapter implements Adapter<OpenAIStreamResponse> {
         content: '',
         role: 'assistant',
         done: true,
-        data: null
+        data: null,
       }
     } catch (error) {
       console.error('OpenAI 解析错误:', error)
@@ -186,8 +193,11 @@ class OpenAIAdapter implements Adapter<OpenAIStreamResponse> {
 // ==================== Ollama 适配器 ====================
 
 class OllamaAdapter implements Adapter<OllamaStreamResponse> {
-  getType(): string { return 'ollama' }
+  getType(): string {
+    return 'ollama'
+  }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async *process(response: any): AsyncGenerator<ChatStreamChunk, void, unknown> {
     const reader = response.getReader()
 
@@ -205,7 +215,7 @@ class OllamaAdapter implements Adapter<OllamaStreamResponse> {
             content: data.response,
             role: 'assistant',
             done: false,
-            data: data.response
+            data: data.response,
           }
         }
       }
@@ -214,7 +224,7 @@ class OllamaAdapter implements Adapter<OllamaStreamResponse> {
         content: '',
         role: 'assistant',
         done: true,
-        data: null
+        data: null,
       }
     } catch (error) {
       console.error('Ollama 解析错误:', error)
@@ -242,8 +252,11 @@ class MockAdapter implements Adapter<ChatStreamChunk> {
     }
   }
 
-  getType(): string { return 'mock' }
+  getType(): string {
+    return 'mock'
+  }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async *process(_response: any): AsyncGenerator<ChatStreamChunk, void, unknown> {
     // Mock 模式：按小片段增量读取，模拟真实流式体验
     for (let i = 0; i < this.chunks.length; i++) {
@@ -253,18 +266,18 @@ class MockAdapter implements Adapter<ChatStreamChunk> {
         content: chunk,
         role: 'assistant',
         done: false,
-        data: chunk
+        data: chunk,
       }
 
       // 模拟网络延迟（真实 SSE 由服务器控制）
-      await new Promise(resolve => setTimeout(resolve, this.speed))
+      await new Promise((resolve) => setTimeout(resolve, this.speed))
     }
 
     yield {
       content: '',
       role: 'assistant',
       done: true,
-      data: null
+      data: null,
     }
   }
 }

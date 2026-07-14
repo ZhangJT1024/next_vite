@@ -24,7 +24,7 @@
           </el-form>
         </el-card>
 
-        <el-card shadow="hover" style="margin-top: 20px;">
+        <el-card shadow="hover" style="margin-top: 20px">
           <template #header>
             <div class="card-header">
               <span>品牌设置</span>
@@ -32,11 +32,11 @@
           </template>
 
           <el-form label-width="100px">
-            <el-form-item label="主题色" style="margin-bottom: 20px;">
+            <el-form-item label="主题色" style="margin-bottom: 20px">
               <el-color-picker v-model="form.themeColor" />
             </el-form-item>
 
-            <el-form-item label="深色模式" style="margin-bottom: 20px;">
+            <el-form-item label="深色模式" style="margin-bottom: 20px">
               <el-switch v-model="form.darkMode" active-text="启用" inactive-text="禁用" />
             </el-form-item>
 
@@ -56,7 +56,7 @@
           <p>定期修改密码并启用双重验证可提高账户安全性。</p>
         </el-alert>
 
-        <el-card shadow="hover" style="margin-top: 20px;">
+        <el-card shadow="hover" style="margin-top: 20px">
           <template #header>
             <div class="card-header">
               <span>账户安全</span>
@@ -72,13 +72,13 @@
             </el-form-item>
             <el-form-item label="密码强度">
               <span :style="{ color: getStrengthColor(form.passwordStrength) }">
-                {{ passwordStrengthLabels[form.passwordStrength] }}
+                {{ passwordStrengthLabels[form.passwordStrength as number] }}
               </span>
             </el-form-item>
           </el-form>
         </el-card>
 
-        <el-card shadow="hover" style="margin-top: 20px;">
+        <el-card shadow="hover" style="margin-top: 20px">
           <template #header>
             <div class="card-header">
               <span>登录安全</span>
@@ -90,10 +90,16 @@
               <el-input v-model="form.ipWhitelist" placeholder="输入允许的 IP，用逗号分隔" />
             </el-form-item>
             <el-form-item label="失败次数限制">
-              <el-input-number v-model="form.loginAttempts" :min="3" :max="10" /> 次
+              <el-input-number v-model="form.loginAttempts" :min="3" :max="10" />
+              次
             </el-form-item>
             <el-form-item label="锁定时间">
-              <el-slider v-model="form.lockTime" :max="60" format-tooltip="{ value: v => `${v}分钟` }" /> 分钟
+              <el-slider
+                v-model="form.lockTime"
+                :max="60"
+                format-tooltip="{ value: v => `${v}分钟` }"
+              />
+              分钟
             </el-form-item>
           </el-form>
         </el-card>
@@ -108,7 +114,7 @@
             </div>
           </template>
 
-          <el-row :gutter="20" style="margin-bottom: 20px;">
+          <el-row :gutter="20" style="margin-bottom: 20px">
             <el-col :span="8">
               <el-button type="primary" :icon="Download" @click="backupData">备份数据</el-button>
             </el-col>
@@ -128,14 +134,23 @@
             </el-table-column>
             <el-table-column label="操作" width="200">
               <template #default="{ row }">
-                <el-button size="small" :icon="Download" @click="downloadBackup(row)">下载</el-button>
-                <el-button size="small" type="primary" :icon="Delete" @click="deleteBackup(row.id, row.name)">删除</el-button>
+                <el-button size="small" :icon="Download" @click="downloadBackup(row)">
+                  下载
+                </el-button>
+                <el-button
+                  size="small"
+                  type="primary"
+                  :icon="Delete"
+                  @click="deleteBackup(row.id, row.name)"
+                >
+                  删除
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
         </el-card>
 
-        <el-card shadow="hover" style="margin-top: 20px;">
+        <el-card shadow="hover" style="margin-top: 20px">
           <template #header>
             <div class="card-header">
               <span>系统日志</span>
@@ -211,21 +226,20 @@ const form = reactive({
   lockTime: 30,
   emailNotification: true,
   smsNotification: false,
-  systemMessageTypes: ['登录日志', '操作提醒']
+  systemMessageTypes: ['登录日志', '操作提醒'],
 })
 
 // 密码强度相关
-const passwordStrength = ref(2)
 const passwordStrengthLabels = {
   1: '弱',
   2: '中等',
-  3: '强'
+  3: '强',
 } as const
 
 // 备份列表
 const backupList = ref([
   { id: 1, name: 'backup_20240610.sql', size: 1024000, createdAt: '2024-06-10' },
-  { id: 2, name: 'backup_20240608.sql', size: 980000, createdAt: '2024-06-08' }
+  { id: 2, name: 'backup_20240608.sql', size: 980000, createdAt: '2024-06-08' },
 ])
 
 // 日志数据
@@ -234,10 +248,9 @@ const operationLog = reactive({ time: '' })
 
 // 对话框
 const passwordDialogVisible = ref(false)
-const basicFormRef = ref<FormInstance>()
 
 // 修改密码
-const handleChangePassword = (newPassword: string) => {
+const handleChangePassword = () => {
   ElMessage.success('密码修改成功')
   passwordDialogVisible.value = false
 }
@@ -257,7 +270,7 @@ const restoreData = () => {
   ElMessageBox.confirm('确定要恢复数据吗？这将覆盖现有数据。', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    type: 'warning'
+    type: 'warning',
   }).then(() => {
     ElMessage.success('数据恢复成功')
   })
@@ -273,9 +286,9 @@ const deleteBackup = (id: number, name: string) => {
   ElMessageBox.confirm(`确定要删除 ${name} 吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    type: 'warning'
+    type: 'warning',
   }).then(() => {
-    backupList.value = backupList.value.filter(item => item.id !== id)
+    backupList.value = backupList.value.filter((item) => item.id !== id)
     ElMessage.success('删除成功')
   })
 }

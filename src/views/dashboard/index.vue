@@ -8,7 +8,7 @@
         </div>
       </template>
       <el-descriptions :column="3" border>
-        <el-descriptions-item label="当前状态" span="2">在线</el-descriptions-item>
+        <el-descriptions-item label="当前状态" :span="2">在线</el-descriptions-item>
         <el-descriptions-item label="登录时间">
           {{ formatDate(userStore.userInfo?.lastLoginTime) }}
         </el-descriptions-item>
@@ -92,9 +92,9 @@
               <span>用户增长趋势</span>
             </div>
           </template>
-          <div ref="userTrendChart" class="chart-container" style="height: 300px;">
+          <div ref="userTrendChart" class="chart-container" style="height: 300px">
             <!-- 图表占位符 -->
-            <el-empty description="数据加载中..." image-size="small" />
+            <el-empty description="数据加载中..." :image-size="60" />
           </div>
         </el-card>
       </el-col>
@@ -106,9 +106,9 @@
               <span>设备分布</span>
             </div>
           </template>
-          <div ref="deviceChart" class="chart-container" style="height: 300px;">
+          <div ref="deviceChart" class="chart-container" style="height: 300px">
             <!-- 图表占位符 -->
-            <el-empty description="数据加载中..." image-size="small" />
+            <el-empty description="数据加载中..." :image-size="60" />
           </div>
         </el-card>
       </el-col>
@@ -137,9 +137,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { UserFilled, Avatar, Tickets, Odometer } from '@element-plus/icons-vue'
-import type { UserInfo } from '@/types'
 import { useUserStore } from '@/store/user'
 const userStore = useUserStore()
 
@@ -154,7 +153,7 @@ const stats = ref<Stats>({
   userCount: 0,
   visits: 0,
   revenue: '128,450',
-  uptime: '365'
+  uptime: '365',
 })
 
 const userTrendChart = ref<HTMLDivElement>()

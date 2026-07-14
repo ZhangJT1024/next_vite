@@ -1,5 +1,3 @@
-import type { VNode } from 'vue'
-
 /**
  * 推理块（Reasoning Block）渲染器
  *
@@ -35,23 +33,23 @@ export const REASONING_STYLES: Record<string, ReasoningBlockStyle> = {
   thought: {
     backgroundColor: '#fffbe6',
     borderColor: '#ffe58f',
-    textColor: '#d46b08'
+    textColor: '#d46b08',
   },
   planning: {
     backgroundColor: '#f0f9ff',
     borderColor: '#bae7fd',
-    textColor: '#026aaa'
+    textColor: '#026aaa',
   },
   evaluating: {
     backgroundColor: '#ecfdf5',
     borderColor: '#bbf7d0',
-    textColor: '#146b3a'
+    textColor: '#146b3a',
   },
   concluding: {
     backgroundColor: '#fef2f2',
-    borderColor: #fed7d7,
-    textColor: '#991b1b'
-  }
+    borderColor: '#fed7d7',
+    textColor: '#991b1b',
+  },
 }
 
 /**
@@ -71,26 +69,28 @@ export class ReasoningBlockRenderer {
    * 提取所有推理块及其内容
    */
   extractReasoningBlocks(text: string): ReasoningBlock[] {
-    const pattern = new RegExp(
-      `\\${this.marker.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}([^<]*?)\\</g`
-    )
+    const regex = new RegExp(`<reasoning[^>]*>([\\s\\S]*?)</reasoning>`, 'gi')
 
-    const matches = text.match(pattern) || []
+    const results: ReasoningBlock[] = []
+    let match: RegExpExecArray | null
 
-    return matches.map(match => {
+    while ((match = regex.exec(text)) !== null) {
+      const fullMatch = match[0]
+
       // 提取推理类型和内容
-      const typeMatch = match.match(/data-type="([^"]*)"/)
+      const typeMatch = fullMatch.match(/data-type="([^"]*)"/)
       const type = typeMatch ? typeMatch[1] : 'thought'
 
-      const contentStart = match.indexOf(this.marker) + this.marker.length
-      const content = match.slice(contentStart).replace(/<$/, '')
+      const rawContent = match[1]?.trim() || ''
 
-      return {
-        content,
+      results.push({
+        content: rawContent,
         type,
-        hidden: false
-      }
-    })
+        hidden: false,
+      })
+    }
+
+    return results
   }
 
   /**
@@ -104,24 +104,24 @@ export class ReasoningBlockRenderer {
     const blocks = this.extractReasoningBlocks(text)
 
     // 移除标记，替换为占位符
-    let formatted = text.replace(/<reasoning[^>]*>(.*?)<\/reason>/gis, (match, content) => {
-      return `[${this.marker}${content.replace(/[\n`]/g, '')}]`
-    })
+    const formatted = text.replace(
+      /<reasoning[^>]*>([\s\S]*?)<\/reasoning>/gi,
+      (_match, content) => {
+        return `[${this.marker}${content.replace(/[\n\r]/g, '')}]`
+      },
+    )
 
     return {
       plainText: text, // 原始文本（用于最终展示）
       reasoningBlocks: blocks,
-      finalContent: formatted
+      finalContent: formatted,
     }
   }
 
   /**
    * 渲染推理块到 DOM 元素（Vue SSR/SSG 兼容）
    */
-  async renderToElement(
-    element: HTMLElement,
-    text: string
-  ): Promise<void> {
+  async renderToElement(element: HTMLElement, text: string): Promise<void> {
     const result = this.formatForRendering(text)
 
     // 插入推理块容器
@@ -130,24 +130,24 @@ export class ReasoningBlockRenderer {
       div.className = 'reasoning-block'
 
       // 设置样式主题
-      const style = REASONING_STYLES[block.type] || REASONING_STYLES.thought
+      const style = REASONING_STYLES[block.type as string] || REASONING_STYLES.thought
       div.style.cssText = `
-        background-color: ${style.backgroundColor}
-        border-left: 4px solid ${style.borderColor}
-        color: ${style.textColor}
-        padding: 12px 16px
-        margin: 8px 0
-        border-radius: 4px
+        background-color: ${style.backgroundColor};
+        border-left: 4px solid ${style.borderColor};
+        color: ${style.textColor};
+        padding: 12px 16px;
+        margin: 8px 0;
+        border-radius: 4px;
       `
 
       // 推理类型图标
-      const icon = this.getIconForType(block.type)
+      const icon = this.getIconForType(block.type || 'thought')
 
       div.innerHTML = `
         <div style="display: flex; align-items: flex-start; gap: 8px;">
           <span style="font-size: 16px; margin-top: 2px;">${icon}</span>
           <div style="flex: 1;">
-            <strong style="font-size: 12px; opacity: 0.8;">${this.getTypeLabel(block.type)}</strong>
+            <strong style="font-size: 12px; opacity: 0.8;">${this.getTypeLabel(block.type || 'thought')}</strong>
             <div style="margin-top: 4px; white-space: pre-wrap;">${block.content}</div>
           </div>
         </div>
@@ -173,7 +173,7 @@ export class ReasoningBlockRenderer {
       thought: '💭',
       planning: '📋',
       evaluating: '⚖️',
-      concluding: '✅'
+      concluding: '✅',
     }
 
     return icons[type.toLowerCase()] || '🧠'
@@ -187,23 +187,9 @@ export class ReasoningBlockRenderer {
       thought: '思考',
       planning: '规划',
       evaluating: '评估',
-      concluding: '结论'
+      concluding: '结论',
     }
 
     return labels[type.toLowerCase()] || type.toUpperCase()
-  }
-
-  /**
-   * 创建 Vue 组件化的推理块渲染器
-   */
-  toVueComponent(): VNode {
-    return {
-      __v_isVNode: true,
-      __v_skip: true,
-      props: {},
-      children: null,
-      type: 'div' as any,
-      key: 'reasoning-block-wrapper'
-    }
   }
 }

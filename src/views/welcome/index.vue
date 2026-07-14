@@ -48,9 +48,7 @@
 
     <!-- 快速导航按钮 -->
     <div class="action-buttons">
-      <el-button type="primary" size="large" @click="navigateTo('/login')">
-        进入登录页面
-      </el-button>
+      <el-button type="primary" size="large" @click="navigateTo('/login')">进入登录页面</el-button>
       <el-button type="success" size="large" @click="navigateTo('/register')">
         进入注册页面
       </el-button>
@@ -63,7 +61,6 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 

@@ -1,6 +1,4 @@
 import { defineStore } from 'pinia'
-import axios, { AxiosInstance } from 'axios'
-import type { Ref, ComputedRef } from 'vue'
 
 // ==================== 流式响应格式定义 ====================
 
@@ -30,7 +28,7 @@ export const MOCK_RESPONSES = [
   '好的，我理解你的意思了。关于这个问题，有几个方面需要考虑：第一是性能优化，第二是用户体验。',
   '根据你的描述，我建议采用组件化开发方式。这样可以让代码更清晰、更易维护。你可以参考项目中的其他页面结构。',
   '这是一个很好的想法！在实际项目中，我们可以用这种方式实现。记得要在权限控制上做相应配置哦~',
-  '这个技术方案是可行的。建议你先做好技术调研，评估各种方案的优缺点，然后选择一个最合适的方案。'
+  '这个技术方案是可行的。建议你先做好技术调研，评估各种方案的优缺点，然后选择一个最合适的方案。',
 ]
 
 /** Mock Code 响应 */
@@ -41,11 +39,14 @@ export class MockStream {
   private currentResponse: string = ''
   private speed: number = 30 // 每个字符延迟 (ms)
 
-  constructor(private type: 'default' | 'code' | 'markdown', private chunkSize: number = 3) {
+  constructor(
+    type: 'default' | 'code' | 'markdown',
+    private chunkSize: number = 3,
+  ) {
     if (type === 'code') {
       this.currentResponse = MOCK_CODE_RESPONSE
     } else if (type === 'markdown') {
-      this.currentResponse = MOCK_MARKDOWN_RESPONSE
+      this.currentResponse = MOCK_CODE_RESPONSE // 暂未定义 Markdown mock，先用 code 代替
     } else {
       const randomIndex = Math.floor(Math.random() * MOCK_RESPONSES.length)
       this.currentResponse = MOCK_RESPONSES[randomIndex]
@@ -61,11 +62,11 @@ export class MockStream {
           content: chunk,
           role: 'assistant',
           done: false,
-          data: chunk
+          data: chunk,
         }
       }
       // 模拟网络延迟（真实 SSE 由服务器控制）
-      await new Promise(resolve => setTimeout(resolve, this.speed))
+      await new Promise((resolve) => setTimeout(resolve, this.speed))
     }
 
     // 完成标志
@@ -73,7 +74,7 @@ export class MockStream {
       content: '',
       role: 'assistant',
       done: true,
-      data: null
+      data: undefined,
     }
   }
 }
@@ -87,28 +88,13 @@ export interface ChatSession {
   answers: Array<{ timestamp: number; content: string }>
 }
 
-interface ChatState {
-  /** 当前会话列表 */
-  sessions: ChatSession[]
-  /** 是否正在思考/生成 */
-  isThinking: boolean
-  /** 加载进度 (0-100) */
-  loadingProgress: number
-  /** 完整历史（用户 +AI） */
-  history: Array<{ role: 'user' | 'assistant'; content: string }>
-  /** 当前输入内容 */
-  input: string
-  /** 当前模型提供者 */
-  model: ModelProvider
-}
-
-export enum ModelProvider  {
+export enum ModelProvider {
   DEFAULT = 'default',
   CLAUDE = 'claude',
   GPT = 'gpt',
-  OLLAMA = 'ollama'
+  OLLAMA = 'ollama',
 }
- 
+
 export const useChatStore = defineStore('chat', () => {
   // 状态初始化
   const sessions = ref<ChatSession[]>([])
@@ -127,28 +113,30 @@ export const useChatStore = defineStore('chat', () => {
       sessions.value.push({
         id: Date.now().toString(),
         question: '',
-        answers: []
+        answers: [],
       })
     }
   }
 
   /** 创建新的流式响应生成器 */
-  const createStream = async (type: 'default' | 'code' | 'markdown'): Promise<AsyncGenerator<ChatStreamChunk, void, unknown>> => {
+  const createStream = async (
+    type: 'default' | 'code' | 'markdown',
+  ): Promise<AsyncGenerator<ChatStreamChunk, void, unknown>> => {
     // 真实项目：此处应返回实际的 SSE fetch 生成器
     // 例如：
     // const response = await axios.post('/api/chat/stream', { message: input.value }, { responseType: 'stream' })
     // const reader = response.data.pipeThrough(new ReadableStreamReader())
 
     // 暂时使用 Mock Stream（开发友好）
-    return new MockStream(type)
+    return new MockStream(type)[Symbol.asyncIterator]()
   }
 
   /** 获取当前模型 */
   const getCurrentModel = (): ModelProvider => model.value
 
   /** 切换模型 */
-  const setModel = (model: ModelProvider) => {
-    model.value = model
+  const setModel = (newModel: ModelProvider) => {
+    model.value = newModel
   }
 
   /** 清空历史 */
@@ -171,6 +159,6 @@ export const useChatStore = defineStore('chat', () => {
     createStream,
     getCurrentModel,
     setModel,
-    clearHistory
+    clearHistory,
   }
 })

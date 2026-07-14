@@ -6,7 +6,7 @@
  * - UI 只需监听 buffer 变化即可，无需关心底层协议细节
  */
 
-export interface TypewriterBuffer {
+export interface ITypewriterBuffer {
   /** 当前完整文本 */
   readonly text: string
   /** 是否已完成生成 */
@@ -26,14 +26,15 @@ export interface TypewriterBuffer {
  */
 export class TypewriterBuffer {
   private buffer: string = ''
-  private readonly speed: number = 30 // 每帧延迟 ms
+  private speed: number = 30 // 每帧延迟 ms
   private readonly chunkSize: number = 2 // 每批增量字节数
   private readonly maxProgress = 100
-  private readonly timerId: number | null = null
+  private timerId: ReturnType<typeof setTimeout> | null = null
+  private bytesRead = 0
 
   constructor(
     private stream: AsyncIterable<string>,
-    private onComplete?: () => void
+    private onComplete?: () => void,
   ) {
     this.processStream()
   }
@@ -43,7 +44,6 @@ export class TypewriterBuffer {
    */
   private async processStream(): Promise<void> {
     let accumulated = ''
-    let bytesRead = 0
     let done = false
 
     try {
@@ -58,13 +58,9 @@ export class TypewriterBuffer {
         }
 
         accumulated += chunk.value
-
-        // 按固定字节数切分（模拟真实打字机效果）
-        const splitSize = Math.min(chunkSize * 2, accumulated.length)
-        const newBytes = accumulated.slice(-splitSize)
+        this.bytesRead += chunk.value.length
 
         this.buffer = accumulated
-        bytesRead = this.buffer.length
 
         if (accumulated.length > 100) {
           // 超过阈值后加快节奏（避免 UI 卡顿）
@@ -75,7 +71,7 @@ export class TypewriterBuffer {
         this.notifyUpdate()
 
         // 等待下一帧
-        await new Promise(resolve => setTimeout(resolve, this.speed))
+        await new Promise((resolve) => setTimeout(resolve, this.speed))
       }
 
       // 完成处理
@@ -94,7 +90,7 @@ export class TypewriterBuffer {
    * 通知 UI 更新
    */
   private notifyUpdate(): void {
-    const progress = Math.min(100, (bytesRead / 100) * this.maxProgress)
+    const progress = Math.min(100, (this.bytesRead / 100) * this.maxProgress)
     this.emitUpdate(this.buffer, progress < 100)
   }
 
@@ -103,11 +99,15 @@ export class TypewriterBuffer {
    */
   private emitUpdate(text: string, isStreaming: boolean): void {
     // 注册到全局事件总线，供组件订阅
-    if (window.typewriterEventBus) {
-      window.typewriterEventBus.emit('text-update', {
+    // TODO: 使用 Vue 的事件总线替代 window 上的全局变量
+    const bus = (window as Record<string, unknown>).typewriterEventBus as {
+      emit?: (event: string, data: unknown) => void
+    }
+    if (bus?.emit) {
+      bus.emit('text-update', {
         text,
         progress: Math.min(100, (this.buffer.length / 100) * this.maxProgress),
-        done: !isStreaming
+        done: !isStreaming,
       })
     }
   }
@@ -118,7 +118,7 @@ export class TypewriterBuffer {
   private stopTimer(): void {
     if (this.timerId !== null) {
       clearTimeout(this.timerId)
-      this.timerId[0] = -1
+      this.timerId = null
     }
   }
 
@@ -148,7 +148,7 @@ export class TypewriterBuffer {
    */
   reset(): void {
     this.buffer = ''
-    bytesRead = 0
+    this.bytesRead = 0
     this.speed = 30
     this.onComplete?.()
   }

@@ -15,10 +15,15 @@
       "Bash(findstr \"node\\\\|vite\")",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(sed -i \"s|{ path: '/dashboard',|{ path: '/dashboard/home',|g; s|{ path: '/ai', meta: { title: 'AI 对话' },||g\" /g/code/vite/src/layouts/MainLayout.vue)"
+      "Bash(sed -i \"s|{ path: '/dashboard',|{ path: '/dashboard/home',|g; s|{ path: '/ai', meta: { title: 'AI 对话' },||g\" /g/code/vite/src/layouts/MainLayout.vue)",
+      "Read(//g/技术/技术/积累/vite/**)",
+      "Bash(dir \"G:\\\\技术\\\\技术\\\\积累\\\\vite\" /b)",
+      "Bash(mkdir -p \"g:\\\\code\\\\vite\\\\.husky\")",
+      "Bash(npx husky *)",
+      "Bash(npx eslint *)",
+      "Bash(npx prettier *)",
+      "Bash(mkdir -p \"g:\\\\code\\\\vite\\\\.vscode\")"
     ],
-    "additionalDirectories": [
-      "G:\\code\\vite\\src\\layouts"
-    ]
+    "additionalDirectories": ["G:\\code\\vite\\src\\layouts", "g:\\code\\vite"]
   }
 }

@@ -14,7 +14,7 @@
           <el-input v-model="searchForm.username" placeholder="请输入用户名" clearable />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="全部" clearable style="width: 120px;">
+          <el-select v-model="searchForm.status" placeholder="全部" clearable style="width: 120px">
             <el-option label="启用" value="enabled" />
             <el-option label="禁用" value="disabled" />
           </el-select>
@@ -26,13 +26,7 @@
       </el-form>
 
       <!-- 用户表格 -->
-      <el-table
-        v-loading="loading"
-        :data="userList"
-        border
-        stripe
-        style="width: 100%"
-      >
+      <el-table v-loading="loading" :data="userList" border stripe style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="username" label="用户名" width="150" />
         <el-table-column prop="nickname" label="昵称" width="150">
@@ -60,7 +54,9 @@
         <el-table-column label="操作" width="200">
           <template #default="{ row }">
             <el-button size="small" :icon="Edit" @click="handleEdit(row)">编辑</el-button>
-            <el-button size="small" :icon="Delete" type="danger" @click="handleDelete(row.id)">删除</el-button>
+            <el-button size="small" :icon="Delete" type="danger" @click="handleDelete(row.id)">
+              删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -80,17 +76,8 @@
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog
-      v-model="dialogVisible"
-      :title="isEdit ? '编辑用户' : '新增用户'"
-      width="500px"
-    >
-      <el-form
-        ref="userFormRef"
-        :model="formData"
-        :rules="rules"
-        label-width="80px"
-      >
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑用户' : '新增用户'" width="500px">
+      <el-form ref="userFormRef" :model="formData" :rules="rules" label-width="80px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="formData.username" placeholder="请输入用户名" />
         </el-form-item>
@@ -127,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { UserInfo } from '@/types'
@@ -140,14 +127,14 @@ const userFormRef = ref<FormInstance>()
 // 搜索表单
 const searchForm = reactive({
   username: '',
-  status: ''
+  status: '',
 })
 
 // 分页
 const pagination = reactive({
   page: 1,
   limit: 10,
-  total: 0
+  total: 0,
 })
 
 // 用户列表
@@ -157,7 +144,7 @@ const userList = ref<UserInfo[]>([])
 const roleMap = {
   admin: '管理员',
   editor: '编辑者',
-  user: '普通用户'
+  user: '普通用户',
 }
 
 // 表单数据
@@ -168,14 +155,14 @@ const formData = reactive({
   email: '',
   phone: '',
   role: 'user',
-  status: 'enabled'
+  status: 'enabled',
 })
 
 // 表单验证规则
 const rules: FormRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
-  email: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }]
+  email: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }],
 }
 
 // 加载用户列表
@@ -183,9 +170,33 @@ const loadUserList = async () => {
   loading.value = true
   try {
     userList.value = [
-      { id: 1, username: 'admin', nickname: '管理员', email: 'admin@example.com', phone: '13800138000', role: 'admin', status: 'enabled' },
-      { id: 2, username: 'user1', nickname: '张三', email: 'zhangsan@example.com', phone: '13900139000', role: 'editor', status: 'enabled' },
-      { id: 3, username: 'user2', nickname: '李四', email: 'lisi@example.com', phone: '13700137000', role: 'user', status: 'disabled' }
+      {
+        id: 1,
+        username: 'admin',
+        nickname: '管理员',
+        email: 'admin@example.com',
+        phone: '13800138000',
+        role: 'admin',
+        status: 'enabled',
+      },
+      {
+        id: 2,
+        username: 'user1',
+        nickname: '张三',
+        email: 'zhangsan@example.com',
+        phone: '13900139000',
+        role: 'editor',
+        status: 'enabled',
+      },
+      {
+        id: 3,
+        username: 'user2',
+        nickname: '李四',
+        email: 'lisi@example.com',
+        phone: '13700137000',
+        role: 'user',
+        status: 'disabled',
+      },
     ]
     pagination.total = userList.value.length
   } finally {
@@ -227,7 +238,7 @@ const handleEdit = (row: UserInfo) => {
 }
 
 // 删除用户
-const handleDelete = (id: number) => {
+const handleDelete = () => {
   ElMessage.warning('该功能需要后端 API 支持')
 }
 

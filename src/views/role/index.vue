@@ -14,7 +14,7 @@
           <el-input v-model="searchForm.name" placeholder="请输入角色名称" clearable />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="全部" clearable style="width: 120px;">
+          <el-select v-model="searchForm.status" placeholder="全部" clearable style="width: 120px">
             <el-option label="启用" value="enabled" />
             <el-option label="禁用" value="disabled" />
           </el-select>
@@ -36,7 +36,7 @@
         <el-table-column prop="code" label="权限码" width="200" />
         <el-table-column label="角色描述" min-width="180">
           <template #default="{ row }">
-            <div style="max-height: 60px; overflow: hidden;">{{ row.description }}</div>
+            <div style="max-height: 60px; overflow: hidden">{{ row.description }}</div>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
@@ -59,7 +59,9 @@
         <el-table-column label="操作" width="200">
           <template #default="{ row }">
             <el-button size="small" :icon="Edit" @click="handleEdit(row)">编辑</el-button>
-            <el-button size="small" :icon="Delete" type="danger" @click="handleDelete(row.id)">删除</el-button>
+            <el-button size="small" :icon="Delete" type="danger" @click="handleDelete(row.id)">
+              删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -79,17 +81,8 @@
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog
-      v-model="dialogVisible"
-      :title="isEdit ? '编辑角色' : '新增角色'"
-      width="500px"
-    >
-      <el-form
-        ref="roleFormRef"
-        :model="formData"
-        :rules="rules"
-        label-width="80px"
-      >
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑角色' : '新增角色'" width="500px">
+      <el-form ref="roleFormRef" :model="formData" :rules="rules" label-width="80px">
         <el-form-item label="角色名称" prop="name">
           <el-input v-model="formData.name" placeholder="请输入角色名称" />
         </el-form-item>
@@ -121,21 +114,21 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 
 // 搜索表单
 const searchForm = reactive({
   name: '',
-  status: ''
+  status: '',
 })
 
 // 分页
 const pagination = reactive({
   page: 1,
   limit: 10,
-  total: 0
+  total: 0,
 })
 
 // loading
@@ -155,13 +148,13 @@ const formData = reactive({
   name: '',
   code: '',
   description: '',
-  status: 'enabled'
+  status: 'enabled',
 })
 
 // 表单验证规则
 const rules: FormRules = {
   name: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
-  code: [{ required: true, message: '请输入权限码', trigger: 'blur' }]
+  code: [{ required: true, message: '请输入权限码', trigger: 'blur' }],
 }
 
 // 加载角色列表
@@ -169,9 +162,30 @@ const loadRoleList = async () => {
   loading.value = true
   try {
     roleList.value = [
-      { id: 1, name: '超级管理员', code: '^admin$', description: '拥有系统所有权限', status: 'enabled', createdAt: '2024-01-01' },
-      { id: 2, name: '编辑者', code: '^editor$', description: '可以编辑和管理内容', status: 'enabled', createdAt: '2024-01-05' },
-      { id: 3, name: '普通用户', code: '^user$', description: '基础的查看权限', status: 'enabled', createdAt: '2024-01-10' }
+      {
+        id: 1,
+        name: '超级管理员',
+        code: '^admin$',
+        description: '拥有系统所有权限',
+        status: 'enabled',
+        createdAt: '2024-01-01',
+      },
+      {
+        id: 2,
+        name: '编辑者',
+        code: '^editor$',
+        description: '可以编辑和管理内容',
+        status: 'enabled',
+        createdAt: '2024-01-05',
+      },
+      {
+        id: 3,
+        name: '普通用户',
+        code: '^user$',
+        description: '基础的查看权限',
+        status: 'enabled',
+        createdAt: '2024-01-10',
+      },
     ]
     pagination.total = roleList.value.length
   } finally {
@@ -207,7 +221,7 @@ const handleEdit = (row: any) => {
 }
 
 // 删除角色
-const handleDelete = (id: number) => {
+const handleDelete = () => {
   ElMessage.warning('该功能需要后端 API 支持')
 }
 

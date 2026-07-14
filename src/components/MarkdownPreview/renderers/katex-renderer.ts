@@ -1,5 +1,3 @@
-import type { VNode } from 'vue'
-
 /**
  * KaTeX 数学公式渲染器
  *
@@ -7,6 +5,15 @@ import type { VNode } from 'vue'
  * - 行内公式 $...$
  * - 块级公式 $$...$$ 或 \[\...\]
  */
+
+declare global {
+  interface Window {
+    katex?: {
+      render: (text: string, element: HTMLElement, options: Record<string, unknown>) => void
+    }
+  }
+}
+
 export class KatexRenderer {
   private katexInitialized = false
   private readonly renderTimeout = 100
@@ -26,12 +33,12 @@ export class KatexRenderer {
 
     // 块级公式（高优先级）
     for (const el of Array.from(blockElements)) {
-      await this.renderBlock(el)
+      await this.renderBlock(el as HTMLElement)
     }
 
     // 行内公式
     for (const el of Array.from(inlineElements)) {
-      await this.renderInline(el)
+      await this.renderInline(el as HTMLElement)
     }
   }
 
@@ -44,13 +51,12 @@ export class KatexRenderer {
 
     try {
       // 延迟渲染避免布局抖动
-      await new Promise(resolve => setTimeout(resolve, this.renderTimeout))
+      await new Promise((resolve) => setTimeout(resolve, this.renderTimeout))
 
-      // @ts-ignore - KaTeX not in TypeScript types
       window.katex.render(text, el, {
         displayMode: true,
         throwOnError: false,
-        output: 'html'
+        output: 'html',
       })
     } catch (e) {
       console.error('KaTeX render error:', e)
@@ -67,13 +73,12 @@ export class KatexRenderer {
     if (!parent) return
 
     try {
-      await new Promise(resolve => setTimeout(resolve, this.renderTimeout))
+      await new Promise((resolve) => setTimeout(resolve, this.renderTimeout))
 
-      // @ts-ignore
       window.katex.render(el.textContent?.trim() || '', parent, {
         displayMode: false,
         throwOnError: false,
-        output: 'html'
+        output: 'html',
       })
     } catch (e) {
       console.error('KaTeX inline render error:', e)

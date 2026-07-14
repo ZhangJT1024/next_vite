@@ -6,12 +6,7 @@
         <p>欢迎登录</p>
       </div>
 
-      <el-form
-        ref="loginFormRef"
-        :model="loginForm"
-        :rules="rules"
-        size="large"
-      >
+      <el-form ref="loginFormRef" :model="loginForm" :rules="rules" size="large">
         <el-form-item prop="username">
           <el-input
             v-model="loginForm.username"
@@ -37,18 +32,14 @@
           <el-link type="primary" underline>忘记密码</el-link>
         </el-form-item>
 
-        <el-button
-          type="primary"
-          :loading="loading"
-          size="large"
-          @click="handleLogin"
-        >
+        <el-button type="primary" :loading="loading" size="large" @click="handleLogin">
           登录
         </el-button>
       </el-form>
 
       <div class="login-footer">
-        还没有账号？<router-link to="/register">立即注册</router-link>
+        还没有账号？
+        <router-link to="/register">立即注册</router-link>
       </div>
     </el-card>
 
@@ -61,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -74,7 +65,7 @@ const userStore = useUserStore()
 // 登录表单
 const loginForm = reactive({
   username: '',
-  password: ''
+  password: '',
 })
 
 // 记住我
@@ -88,18 +79,14 @@ let loginTimer: ReturnType<typeof setTimeout> | null = null
 
 // 表单验证规则
 const rules: FormRules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }, 
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' }, 
-  ]
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 }
 
 // 登录
 const handleLogin = async () => {
   // 防抖处理
-  
+
   if (loginTimer) clearTimeout(loginTimer)
   loginTimer = setTimeout(async () => {
     await loginFormRef.value?.validate()
@@ -107,12 +94,11 @@ const handleLogin = async () => {
     loading.value = true
     try {
       const result = await userStore.login({
-        account: loginForm.username,
-        password: loginForm.password
+        username: loginForm.username,
+        password: loginForm.password,
       })
-      console.log(result,'登录的时候');
-      
-      
+      console.log(result, '登录的时候')
+
       if (result.success) {
         ElMessage.success('登录成功')
         // 延迟跳转，等待 store 更新
@@ -121,8 +107,8 @@ const handleLogin = async () => {
         }, 500)
       }
     } catch (error: any) {
-      console.log(error,'返回的error');
-      
+      console.log(error, '返回的error')
+
       ElMessage.error(error?.message || '登录失败')
       loading.value = false
     } finally {

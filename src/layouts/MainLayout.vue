@@ -16,7 +16,7 @@
         <template v-for="route in routes" :key="route.path">
           <el-menu-item :index="route.path">
             <template #default>
-              <el-icon><component :is="route.meta?.icon || 'Menu'" /></el-icon>
+              <el-icon><component :is="'Menu'" /></el-icon>
               <span>{{ route.meta?.title }}</span>
             </template>
           </el-menu-item>
@@ -43,7 +43,9 @@
               <el-dropdown-menu>
                 <el-dropdown-item command="profile">个人信息</el-dropdown-item>
                 <el-dropdown-item command="settings">系统设置</el-dropdown-item>
-                <el-dropdown-item divided command="logout" class="danger-text">退出登录</el-dropdown-item>
+                <el-dropdown-item divided command="logout" class="danger-text">
+                  退出登录
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -64,10 +66,10 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted } from 'vue'
 import { UserFilled, ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
 import { usePermissionStore } from '@/store/permission'
-import { log } from 'console'
 
 const route = useRoute()
 const router = useRouter()
@@ -95,16 +97,15 @@ const routes = [
   { path: '/dashboard/users', meta: { title: '用户管理' } },
   { path: '/dashboard/roles', meta: { title: '角色管理' } },
   { path: '/dashboard/settings', meta: { title: '系统设置' } },
-  { path: '/dashboard/ai', meta: { title: 'AI 对话' } }
+  { path: '/dashboard/ai', meta: { title: 'AI 对话' } },
 ]
 
 // 处理命令
 const handleCommand = (command: string) => {
   if (command === 'logout') {
-    userStore.logout().finally(()=>{
-    router.push('/login')
+    userStore.logout().finally(() => {
+      router.push('/login')
     })
-    console.log('进入此处了');
   } else if (command === 'profile') {
     router.push('/profile')
   } else if (command === 'settings') {

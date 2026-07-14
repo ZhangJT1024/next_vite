@@ -3,13 +3,13 @@ import { defineStore } from 'pinia'
 export const usePermissionStore = defineStore('permission', {
   state: () => ({
     permissions: [] as string[],
-    routes: [] as any[]
+    routes: [] as Record<string, unknown>[],
   }),
 
   actions: {
     // 生成可访问的菜单
     generateMenus(permissions: string[]) {
-      const menus: any[] = []
+      const menus: Record<string, unknown>[] = []
 
       for (const permission of permissions) {
         // 解析权限码为路由路径
@@ -21,11 +21,11 @@ export const usePermissionStore = defineStore('permission', {
             name: path.split('/').pop() || '菜单',
             meta: {
               title: this.getMenuTitle(path),
-              icon: this.getIconByPath(path)
-            }
+              icon: this.getIconByPath(path),
+            },
           }
 
-          if (!menus.find(m => m.path === path)) {
+          if (!menus.find((m) => m.path === path)) {
             menus.push(menu)
           }
         }
@@ -41,7 +41,7 @@ export const usePermissionStore = defineStore('permission', {
         '/users': '用户管理',
         '/roles': '角色管理',
         '/settings': '系统设置',
-        '/profile': '个人信息'
+        '/profile': '个人信息',
       }
       return titleMap[path] || path.replace('/', '')
     },
@@ -53,14 +53,14 @@ export const usePermissionStore = defineStore('permission', {
         '/users': 'User',
         '/roles': 'Coordinate',
         '/settings': 'Setting',
-        '/profile': 'UserFilled'
+        '/profile': 'UserFilled',
       }
       return iconMap[path] || ''
     },
 
     // 添加权限路由
-    addRoutes(routes: any[]) {
+    addRoutes(routes: Record<string, unknown>[]) {
       this.routes.push(...routes)
-    }
-  }
+    },
+  },
 })

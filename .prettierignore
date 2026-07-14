@@ -1,0 +1,14 @@
+dist
+node_modules
+public
+coverage
+*.md
+*.svg
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
